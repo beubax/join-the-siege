@@ -1,21 +1,21 @@
 # Heron AI File Classifier
 [![Tests](https://github.com/beubax/join-the-siege/actions/workflows/test.yml/badge.svg)](https://github.com/beubax/join-the-siege/tests)
 
-This project provides a robust and extensible system for classifying documents into predefined industry categories based on their text content. It is designed for scalability, adaptability to new document types and industries, and efficient processing of large document volumes. I roughly spent ~6 hours on this challenge today (May 19th, 2025).
+This project provides a system for classifying documents into predefined industry categories based on their text content. I roughly spent ~6 hours on this challenge today (May 19th, 2025).
 
 ## Core Features
 
 *   **Intelligent Document Understanding**: Accurately classifies documents based on their actual text content, not just filenames.
 *   **Hybrid ML Approach for Optimal Performance**:
     *   Employs a swift, lightweight primary model for rapid, everyday classifications.
-    *   When faced with ambiguity, it intelligently escalates to a more powerful on-device transformer model. This boosts accuracy considerably (e.g., from ~61% to ~79%) while keeping all document data private.
-*   **Automated Training Data Generation**: Utilizes (simulated) LLM capabilities to automatically create synthetic documents, essential for initially training the model and for seamlessly integrating new industry categories.
-*   **Continuous Improvement via Feedback Loop**: The system is designed to learn and adapt. User corrections on classifications are captured and used to incrementally refine the ML model (`partial_fit`), making it smarter over time without requiring costly complete retraining.
+    *   When faced with ambiguity, it intelligently escalates to a more powerful on-device transformer model. This boosts accuracy considerably while keeping all document data private.
+*   **Automated Training Data Generation**: Utilizes LLM capabilities to automatically create synthetic documents, essential for cold starts and for integrating new industry categories.
+*   **Continuous Improvement via Feedback Loop**: The system is designed to learn and adapt. User corrections on classifications are captured and used to incrementally refine the ML model (via `partial_fit`), making it smarter over time without requiring costly complete retraining.
 *   **Efficient Background Processing**: Leverages Celery and Redis to handle demanding tasks like file analysis, ML inference, and model updates asynchronously, ensuring the API remains responsive and the system can scale.
-*   **Data-Driven Model Evolution**: Persistently stores extracted text and classification results (SQLite), providing a rich dataset for ongoing model improvement and learning from historical patterns.
+*   **Data-Driven Model Evolution**: Persistently stores job statuses, extracted text and results (in SQLite), providing a rich dataset for ongoing model improvement and learning from historical patterns.
 *   **Flexible and Extensible Architecture**: Features a modular design and allows for easy substitution of core components (like the primary ML model), facilitating customization and future development.
 *   **Simplified Deployment with Docker**: Includes `Dockerfile` and `docker-compose.yml` for straightforward, consistent setup across various environments.
-*   **Reliability Assured by Testing**: Core functionalities are validated through `pytest` unit tests, providing a dependable foundation.
+*   **Reliability Assured by Testing**: Core functionalities are validated through `pytest` unit tests, providing a dependable foundation. Tests run automatically via github actions when pushed to the main branch.
 
 ## How to Use
 
@@ -23,7 +23,7 @@ This project provides a robust and extensible system for classifying documents i
 *   Python 3.10+
 *   Redis server
 *   Docker and Docker Compose (for containerized deployment)
-*   OpenAI API Key (For synthetic data simulation. The data is, by default generated and stored in the github repo, however LLM call is needed if trying to add new industries. Store in `.env` file as `OPENAI_API_KEY="your_key_here"`).
+*   OpenAI API Key (For synthetic data generation. The data is, by default generated and stored in the github repo, however LLM call is needed if trying to add new industries. Store in `.env` file as `OPENAI_API_KEY="your_key_here"`).
 
 ### Option 1: Local Development Environment
 

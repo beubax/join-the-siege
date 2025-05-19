@@ -6,12 +6,15 @@ from pathlib import Path
 from typing import List, Tuple, Dict
 
 from src.config import settings
-from openai import OpenAI # Uncomment when actually using the API
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) # Uncomment when actually using the API
+try:
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) 
+except Exception as e:
+    client = None
 
 SYNTHETIC_DATA_DIR = settings.BASE_DIR / "data" / "synthetic_data"
 SYNTHETIC_DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -67,6 +70,9 @@ def generate_and_store_synthetic_data_for_industry(industry_name: str, num_docum
     prompt = _generate_detailed_prompt_for_industry(industry_name, num_documents)
  
     try:
+        if not client:
+            raise Exception("OpenAI client not initialized")
+        
         response = client.chat.completions.create(
             model="gpt-4o", # Or your preferred model
             response_format={ "type": "json_object" }, # For structured JSON output

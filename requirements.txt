@@ -15,3 +15,5 @@ transformers
 python-dotenv
 eventlet
 torch
+pytest
+pytest-mock

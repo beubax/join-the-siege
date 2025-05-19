@@ -1,4 +1,5 @@
 # Heron AI File Classifier
+[![Tests](https://github.com/beubax/join-the-siege/actions/workflows/test.yml/badge.svg)](https://github.com/beubax/join-the-siege/tests)
 
 This project provides a robust and extensible system for classifying documents into predefined industry categories based on their text content. It is designed for scalability, adaptability to new document types and industries, and efficient processing of large document volumes. I roughly spent ~6 hours on this challenge today (May 19th, 2025).
 

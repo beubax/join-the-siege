@@ -4,3 +4,148 @@ venv
 .vscode
 __pycache__
 *.pyc
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a PyInstaller script; this is infected by the
+#  tools needed to display corrupted PST files
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*_model
+.cache
+os.cache
+.pytest_cache/
+pytestdebug.log
+
+# Translations
+*.mo
+*.pot
+*.po
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+#   According to Pypa, Pipfile.lock is tightly coupled to Pipfile and should be committed to
+#    VCS with it. However, pipenv is not compatible with PyLaunchers. See #2 Pipfile.lock
+#   issues with PyLaunchers here: https://github.com/pypa/pipenv/issues/2946
+Pipfile.lock
+
+# PEP 582; remove manifest such as __pypackages__ if you wish to distribute it
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+venv/
+ENV/
+env/
+ENV3/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Session specific files from PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# SQLite
+*.sqlite3
+*.db
+# application specific db file
+/data/classifier.db 
+# *.db files in data, but not the main one if needed for initial commit
+# data/*.db
+# !data/classifier.db 
+
+# ML models / data files (if not intended to be in git)
+/data/*.joblib
+/data/*.pkl
+
+# Temporary upload files
+/temp_uploads/

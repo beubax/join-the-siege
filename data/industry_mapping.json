@@ -1,0 +1,9 @@
+{
+    "healthcare": 0,
+    "finance": 1,
+    "legal": 2,
+    "education": 3,
+    "technology": 4,
+    "other": 5,
+    "entertainment": 6
+}

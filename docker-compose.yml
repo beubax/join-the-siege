@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount current directory for development (reflects code changes without rebuilding image)
+      # For production, you might remove this and rely on the image's copied code.
+      - ./src:/app/src 
+      - ./data:/app/data 
+      - ./temp_uploads:/app/temp_uploads # Added shared volume for temp uploads
+    env_file:
+      - .env # For environment-specific configs like API keys, DB URLs if not SQLite
+    environment:
+      # DATABASE_URL: sqlite:////app/data/classifier.db # Already default in config
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      # OPENAI_API_KEY: # Should be in .env
+    depends_on:
+      redis:
+        condition: service_healthy # Wait for Redis to be ready
+    # The command from Dockerfile is used, or can be overridden here:
+    # command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload 
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile # Uses the same Dockerfile as the app
+    volumes:
+      # Mount current directory for development
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./temp_uploads:/app/temp_uploads # Celery worker needs access to temp_uploads
+    env_file:
+      - .env
+    environment:
+      # DATABASE_URL: sqlite:////app/data/classifier.db # Already default in config
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      # OPENAI_API_KEY: # Should be in .env
+    command: celery -A src.celery_tasks.celery_app worker -l info -P eventlet # Use -P eventlet or gevent if issues on some OS
+    depends_on:
+      redis:
+        condition: service_healthy
+      app: # Optional: worker might depend on app if it needs app to be up for some initial setup shared via volume
+           # or if app creates initial model files that worker needs. Given on_startup event, this is safer.
+        condition: service_started # Or a more robust healthcheck for the app if defined
+
+volumes:
+  redis_data:
+
+# To run: docker compose up --build
+# To run in detached mode: docker compose up -d --build
+# To stop: docker compose down 

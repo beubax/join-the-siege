@@ -6,14 +6,14 @@ This project provides a system for classifying documents into predefined industr
 ## Core Features
 
 *   **Intelligent Document Understanding**: Accurately classifies documents based on their actual text content, not just filenames.
-*   **Hybrid ML Approach for Optimal Performance**:
+*   **Hybrid ML Approach with Escalation**:
     *   Employs a swift, lightweight primary model for rapid, everyday classifications.
-    *   When faced with ambiguity, it intelligently escalates to a more powerful on-device transformer model. This boosts accuracy considerably while keeping all document data private.
-*   **Automated Training Data Generation**: Utilizes LLM capabilities to automatically create synthetic documents, essential for cold starts and for integrating new industry categories.
-*   **Continuous Improvement via Feedback Loop**: The system is designed to learn and adapt. User corrections on classifications are captured and used to incrementally refine the ML model (via `partial_fit`), making it smarter over time without requiring costly complete retraining.
+    *   When faced with ambiguity, it escalates to a more powerful on-device transformer model. This boosts accuracy considerably while keeping all document data private.
+*   **No Cold Starts**: Automatically bootstraps by generating/loading initial synthetic training data and pre-training the classification model upon first startup. This ensures the system is immediately operational and ready to classify documents effectively.
+*   **Continuous Improvement via Feedback Loop**: The system is designed to learn and adapt. User corrections on classifications are captured and used to incrementally refine the ML model, making it smarter over time without requiring costly complete retraining.
 *   **Efficient Background Processing**: Leverages Celery and Redis to handle demanding tasks like file analysis, ML inference, and model updates asynchronously, ensuring the API remains responsive and the system can scale.
-*   **Data-Driven Model Evolution**: Persistently stores job statuses, extracted text and results (in SQLite), providing a rich dataset for ongoing model improvement and learning from historical patterns.
-*   **Flexible and Extensible Architecture**: Features a modular design and allows for easy substitution of core components (like the primary ML model), facilitating customization and future development.
+*   **Data-Driven Model Evolution**: Persistently stores job statuses, extracted text and results (in SQLite), providing a rich dataset for ongoing model improvement.
+*   **Flexible and Extensible Architecture**: Features a modular design and allows for easy substitution of core components (like the primary ML model).
 *   **Simplified Deployment with Docker**: Includes `Dockerfile` and `docker-compose.yml` for straightforward, consistent setup across various environments.
 *   **Reliability Assured by Testing**: Core functionalities are validated through `pytest` unit tests, providing a dependable foundation. Tests run automatically via github actions when pushed to the main branch.
 
@@ -79,7 +79,7 @@ The API is served at `http://127.0.0.1:8000` (or your Docker host). Interactive 
 
 This section outlines some of the thinking behind the system's architecture and component choices. The goal was to build a practical and adaptable classification tool.
 
-*   **Primary Classifier: Lightweight for Efficiency**:
+*   **Primary Classifier:**:
     For the main classification task, I opted for a classic machine learning model (e.g., SGDClassifier, configurable via `ML_MODEL_TYPE`). These models offer a good balance between:
     *   **Speed**: They are generally quick for both training and making predictions, which is helpful when dealing with many documents.
     *   **Incremental Learning**: A key feature is their support for `partial_fit`. This allows the model to learn from new data (like user feedback or documents from a new industry) incrementally, without needing to be retrained from scratch each time. This helps the model adapt to real-world data drift and new patterns efficiently.
@@ -90,7 +90,7 @@ This section outlines some of the thinking behind the system's architecture and 
     *   **Improved Accuracy for Tough Cases**: Transformers can offer more nuanced understanding for complex or ambiguous documents, leading to better accuracy in those specific instances. Initial tests showed that this hybrid approach can improve classification accuracy (e.g., from ~61% to ~75%) even with a small initial training set and a limited number of escalations
     *   **Local Processing for Privacy**: By running the transformer on-device, document content remains within the local environment, which can be important for privacy considerations. 
 
-*   **Feedback Loop: Enabling Continuous Improvement**:
+*   **Feedback Loop:**:
     Real-world data rarely perfectly matches synthetic or initial training data. The system includes a feedback mechanism:
     *   **Learning from Corrections**: Users can submit corrected classifications. This feedback, along with the original document text (which I store), is then used to update the primary model using `partial_fit`.
     *   **Iterative Refinement**: This method adjusts the model weights based on the new information without "forgetting" what it learned from older data (mitigating catastrophic forgetting to a large extent, especially when class distributions are somewhat stable or new data isn't overwhelmingly skewed). This iterative refinement is key to a production ML system that improves over time.
@@ -100,14 +100,14 @@ This section outlines some of the thinking behind the system's architecture and 
     *   **Bootstrapping**: This helps create an initial training set.
     *   **Adapting to New Categories**: When a new industry is added, synthetic data generation provides initial examples for that category, allowing the model to start learning about it quickly.
 
-*   **Model Evaluation: Understanding Performance**:
+*   **Model Evaluation:**:
     Whenever the primary model is trained or retrained from a larger dataset, I perform a validation step. The data is split, and I log metrics like overall accuracy and a detailed per-class classification report (including precision, recall, F1-score). This gives us a snapshot of how well the model is performing and where it might be struggling.
 
-*   **FastAPI & Asynchronous Tasks: For a Responsive System**:
+*   **FastAPI & Asynchronous Tasks:**:
     *   **FastAPI**: I chose FastAPI for the API layer due to its performance, built-in data validation (Pydantic), and automatic generation of interactive API documentation, which speeds up development.
     *   **Celery & Redis**: Tasks that can take time—like parsing files, running ML models, generating synthetic data, or retraining—are handled by Celery background workers, with Redis as the message broker. This keeps the main API responsive, as it doesn't have to wait for these longer operations to complete.
 
-*   **SQLite: Simple and Practical Data Storage**:
+*   **SQLite:**:
     For storing job information, extracted text, and feedback, I use SQLite. It's a lightweight, file-based database that's easy to set up and manage for a project of this nature. Storing the extracted text itself is important, as it ensures the exact content used for a prediction is available for reliable retraining if feedback is provided. The use of SQLAlchemy ORM also offers a path to potentially switch to a different SQL database in the future if needed.
 
 ## Project Structure
@@ -156,23 +156,21 @@ The tests cover core features and utilize an in-memory SQLite database to avoid 
 While the current system is robust, several areas offer opportunities for future development:
 
 *   **Advanced File Handling**:
-    *   Support a broader range of file types (e.g., Excel, older `.doc`, image-based PDFs via OCR).
+    *   Support a broader range of file types (e.g., Excel, image-based PDFs via OCR etc).
     *   Improve extraction to leverage structured content like tables within documents.
 *   **Refined ML & NLP Capabilities**:
-    *   Develop more sophisticated criteria for escalating to the transformer model.
+    *   Develop a more sophisticated criteria for escalating to the transformer model.
     *   Explore alternative lightweight or fine-tuned transformer models for primary classification.
-    *   Consider vector databases for managing very large document or feedback corpora.
 *   **Enhanced Feedback System**:
     *   Allow feedback on specific text segments, not just overall document classification.
     *   Implement a review workflow for submitted feedback before retraining.
 *   **Operational Excellence**:
     *   Expand test coverage comprehensively, especially for integrations and edge cases.
-    *   Integrate production-grade structured logging and application performance monitoring (APM).
+    *   Integrate structured logging and application performance monitoring (APM).
     *   Introduce database migration tools (e.g., Alembic) for schema management.
-    *   Bolster security with robust API authentication, authorization, and input sanitization.
+    *   Bolster security with API authentication, authorization, and input sanitization.
 *   **Cloud Deployment & Scalability**:
     *   Utilize cloud object storage (S3, GCS) for temporary file handling in distributed environments.
     *   Migrate from SQLite to a managed cloud database service (RDS, Cloud SQL) for production.
     *   Develop configurations for container orchestration (e.g., Kubernetes Helm charts).
     *   Further ensure services are stateless for easier scaling and resilience.
-*   **Dynamic Category Management**: Shift industry category management from configuration files to a dynamic database source, enabling easier updates via an admin interface.
